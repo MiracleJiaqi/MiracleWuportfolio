@@ -1,0 +1,72 @@
+name: 部署到京东云
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 安装 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: 安装依赖
+      run: |
+        rm -rf node_modules pnpm-lock.yaml
+        npm install -g pnpm
+        pnpm install
+
+    - name: 构建项目
+      run: pnpm build
+
+    - name: 部署到服务器
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        REMOTE_HOST: "36.151.148.84"
+        REMOTE_USER: ${{ secrets.SERVER_USER }}
+        SOURCE: "dist/"
+        TARGET: "/PersonalWeb"
+        ARGS: "-avzr --delete"
+        SCRIPT_BEFORE: |
+          echo "=== 部署目标服务器 ==="
+          hostname
+          date
+          mkdir -p /PersonalWeb
+          chmod -R 755 /PersonalWeb
+        SCRIPT_AFTER: |
+          echo "=== 停止旧的容器和进程 ==="
+          docker stop GSManager3 || true
+          docker rm GSManager3 || true
+          pkill -f "node dist/index.js" || true
+          
+          echo "=== 启动 Node.js 后端服务 ==="
+          cd /PersonalWeb
+          nohup node dist/index.js > /PersonalWeb/app.log 2>&1 &
+          sleep 2
+          
+          echo "=== 启动 Nginx 反向代理 ==="
+          docker run -d \
+            --name GSManager3 \
+            -p 80:80 \
+            -p 443:443 \
+            -v /PersonalWeb/dist:/usr/share/nginx/html:ro \
+            -v /PersonalWeb/nginx.conf:/etc/nginx/nginx.conf:ro \
+            nginx:latest
+          
+          echo "=== 验证部署 ==="
+          sleep 2
+          curl -s http://localhost || echo "服务启动中..."
+          echo ""
+          echo "=== 服务状态 ==="
+          ps aux | grep "node dist/index.js" | grep -v grep || echo "Node.js 进程未运行"
+          docker ps | grep GSManager3 || echo "Nginx 容器未运行"
