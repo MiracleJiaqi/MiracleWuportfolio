@@ -11,7 +11,6 @@ import Profile from "./pages/Profile";
 import Interests from "./pages/Interests";
 import Connect from "./pages/Connect";
 import { AnimatePresence } from "framer-motion";
-
 function Router() {
   const [location] = useLocation();
   return (

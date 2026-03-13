@@ -44,35 +44,35 @@ const interests: InterestItem[] = [
   },
   {
     id: '02',
-    emoji: '🧠',
-    title: 'BCI 脑机接口',
-    subtitle: 'Brain-Computer Interface',
-    level: 70,
-    levelLabel: 'INTERMEDIATE',
+    emoji: '📝',
+    title: '提示词工程',
+    subtitle: 'Prompt Engineering',
+    level: 85,
+    levelLabel: 'ADVANCED',
     color: '#B8BCFF',
-    desc: '探索非侵入式脑机接口信号处理，研究 EEG 信号的特征提取与意图识别。',
+    desc: '深度研究 LLM 提示词优化技巧，构建高效的 AI 下游应用。',
     details: [
-      'P300 信号检测与分类算法',
-      'EEG 预处理流水线优化（SNR +15%）',
-      '独立成分分析（ICA）去噪研究',
+      'Chain-of-Thought 提示设计与优化',
+      'Few-Shot 学习与 In-Context Learning',
+      '提示词注入攻击防御与安全性研究',
     ],
-    tags: ['EEG', 'Python', 'MNE', 'Signal Processing'],
+    tags: ['LLM', 'Prompt', 'AI', 'Engineering'],
   },
   {
     id: '03',
     emoji: '⚡',
     title: '算法与数据结构',
     subtitle: 'Algorithms & DS',
-    level: 90,
-    levelLabel: 'EXPERT',
+    level: 30,
+    levelLabel: 'INTERMEDIATE',
     color: '#6B72E8',
-    desc: '竞赛级算法能力，LeetCode 500+ 题，专注动态规划、图论与系统设计。',
+    desc: '正在按部就班学习算法，打好基础，沐力成长为一名真正的算法工程师。',
     details: [
-      'LeetCode 500+ 题解，Top 15% 排名',
-      '动态规划 · 图论 · 字符串算法',
-      '参与 ACM 区域赛，获铜牌',
+      '每日定量学习 LeetCode 题目',
+      '深入理解动态规划与图论基础',
+      '尊重每一个算法的基础理论',
     ],
-    tags: ['LeetCode', 'DP', 'Graph', 'C++'],
+    tags: ['Learning', 'Fundamentals', 'Growth', 'Coding'],
   },
   {
     id: '04',
@@ -199,7 +199,7 @@ export default function Interests() {
                   <span style={{ color: '#8E94F2' }}>技术宇宙</span> 🌌
                 </h1>
                 <p className="text-base max-w-lg leading-relaxed" style={{ color: '#6B6B6B', fontFamily: 'Inter, sans-serif' }}>
-                  从 AI 对齐到脑机接口，从底层汇编到哲学思辨——每一个领域都是一扇通往不同维度的门。
+                  从数据工程到多模态交互，从底层汇编到哲学思辨——每一个领域都是一扇通往不同维度的门。
                   这里是我的精神地图，记录着每一次认知升级的轨迹。
                 </p>
               </motion.div>
@@ -365,10 +365,10 @@ export default function Interests() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-20">
             {[
-              { emoji: '🤖', title: '人工智能：一种现代方法', author: 'Russell & Norvig', cat: 'AI', color: '#8E94F2' },
-              { emoji: '🧬', title: '神经网络与深度学习', author: 'Michael Nielsen', cat: 'ML', color: '#B8BCFF' },
-              { emoji: '🌌', title: '三体', author: '刘慈欣', cat: '科幻', color: '#C5C8FF' },
-              { emoji: '⚙️', title: '深入理解计算机系统', author: 'CS:APP', cat: 'Systems', color: '#A0A4F8' },
+              { emoji: '📖', title: '数学之美', author: '吴军', cat: '数学', color: '#8E94F2' },
+              { emoji: '💪', title: '被讨厌的勇气', author: '岸见一郎', cat: '心理', color: '#B8BCFF' },
+              { emoji: '🏔️', title: '青山', author: '余华', cat: '文学', color: '#C5C8FF' },
+              { emoji: '🔍', title: '寻找更新中...', author: '持续探索', cat: '阅读', color: '#A0A4F8' },
             ].map((book, i) => (
               <motion.div
                 key={i}
@@ -395,6 +395,54 @@ export default function Interests() {
                 </h3>
                 <p className="text-xs" style={{ color: '#9B9B9B', fontFamily: 'Inter, sans-serif' }}>
                   {book.author}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Recommended Books */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-8"
+          >
+            <p className="section-label mb-2">03 / RECOMMENDATIONS</p>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6" style={{ fontFamily: 'Playfair Display, serif', color: '#2D2D2D' }}>
+              推荐书籍 ⭐
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-20">
+            {[
+              { emoji: '📕', title: '毛泽东选集', author: '毛泽东', desc: '深刻理解中国历史与战略思维的经典著作', color: '#8E94F2' },
+              { emoji: '🌊', title: '浪潮之巅', author: '吴军', desc: '科技产业发展史与商业智慧的完美结合', color: '#B8BCFF' },
+              { emoji: '🧠', title: '认知觉醒', author: '周岭', desc: '深度思考与自我认知的必读之作', color: '#C5C8FF' },
+              { emoji: '🌌', title: '三体', author: '刘慈欣', desc: '硬科幻经典，思考人类与宇宙的终极命题', color: '#A0A4F8' },
+            ].map((book, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="geek-card p-5 group cursor-pointer"
+                whileHover={{ y: -4 }}
+              >
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-3"
+                  style={{ background: `${book.color}15` }}
+                >
+                  {book.emoji}
+                </div>
+                <h3 className="font-semibold text-sm mb-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D2D2D' }}>
+                  {book.title}
+                </h3>
+                <p className="text-xs mb-2" style={{ color: '#9B9B9B', fontFamily: 'Inter, sans-serif' }}>
+                  {book.author}
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: '#6B6B6B', fontFamily: 'Inter, sans-serif' }}>
+                  {book.desc}
                 </p>
               </motion.div>
             ))}

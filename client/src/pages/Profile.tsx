@@ -46,7 +46,7 @@ const skillGroups: SkillGroup[] = [
       { name: 'Python / PyTorch', level: 88, desc: 'LLM 训练 · 数据管道' },
       { name: 'RLHF / 数据标注', level: 92, desc: 'AI Trainer 核心技能' },
       { name: 'MCP Protocol', level: 85, desc: '工具链集成 · Agent 开发' },
-      { name: 'BCI / EEG 信号处理', level: 70, desc: 'MNE · 独立成分分析' },
+
     ],
   },
   {
@@ -55,9 +55,9 @@ const skillGroups: SkillGroup[] = [
     color: '#B8BCFF',
     skills: [
       { name: 'x86 汇编', level: 82, desc: '指令集 · 中断处理 · 调试' },
-      { name: 'C / C++', level: 80, desc: '系统编程 · 数据结构' },
+      { name: 'C / C++', level: 30, desc: '系统编程 · 数据结构' },
       { name: 'Linux / Shell', level: 75, desc: '系统管理 · 自动化脚本' },
-      { name: '算法与数据结构', level: 90, desc: 'LeetCode 500+ · 竞赛经历' },
+      { name: '算法与数据结构', level: 30, desc: '持续学习中 · 基础扎实' },
     ],
   },
   {
@@ -65,9 +65,9 @@ const skillGroups: SkillGroup[] = [
     icon: <BookOpen size={16} />,
     color: '#C5C8FF',
     skills: [
-      { name: 'TypeScript / React', level: 78, desc: '全栈开发 · 组件设计' },
-      { name: 'Node.js / FastAPI', level: 72, desc: 'API 开发 · 微服务' },
-      { name: 'Git / Docker', level: 80, desc: '版本控制 · 容器化部署' },
+      { name: 'TypeScript / React', level: 12, desc: '全栈开发 · 组件设计' },
+      { name: 'Node.js / FastAPI', level: 15, desc: 'API 开发 · 微服务' },
+      { name: 'Git / Docker', level: 20, desc: '版本控制 · 容器化部署' },
     ],
   },
 ];
@@ -448,9 +448,8 @@ export default function Profile() {
                       </div>
                       <div className="space-y-3">
                         {[
-                          { title: '火箭军优秀士兵', year: '2022', icon: '🏅' },
-                          { title: 'LeetCode 算法竞赛 Top 15%', year: '2024', icon: '🏆' },
-                          { title: 'AI 数据标注专业认证', year: '2023', icon: '📜' },
+                          { title: '火箭军优秀士兵', year: '2023', icon: '🏅' },
+                          { title: '且曼学院 19 期学员', year: '2024', icon: '🎓' },
                         ].map((cert, i) => (
                           <div key={i} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(142,148,242,0.04)' }}>
                             <span className="text-lg">{cert.icon}</span>
