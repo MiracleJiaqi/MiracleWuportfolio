@@ -5,16 +5,16 @@
  */
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
-import { ArrowRight, Github, ExternalLink, BookOpen, Code2, Cpu, Layers, ChevronDown } from 'lucide-react';
+import { ArrowRight, Github, ExternalLink, Code2, Cpu, Layers, ChevronDown } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 
-const AVATAR_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/hero-avatar-MYmpxB9zZdZ74Vq8bwruYg.webp';
+const AVATAR_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/avatar_cat_2b4a0042.jpg';
 
 const projects = [
   {
     id: '01',
-    title: 'AI 数据标注平台',
-    desc: '为大语言模型训练构建的高效数据标注工作流，支持多模态任务分发与质量控制。',
+    title: '多模态数据链路搭建',
+    desc: '设计并实现了支持文本、图像、音频多模态的数据处理管道，集成了预处理、特征提取、数据验证等核心模块，为大规模 AI 模型训练提供高质量数据源。',
     tags: ['Python', 'FastAPI', 'React'],
     icon: <Cpu size={20} />,
     color: '#8E94F2',
@@ -33,19 +33,19 @@ const projects = [
   },
   {
     id: '03',
-    title: 'BCI 脑机接口研究',
-    desc: '探索非侵入式脑机接口信号处理算法，结合机器学习实现意图识别。',
-    tags: ['Python', 'MNE', 'PyTorch'],
+    title: 'MCP 协议工具链',
+    desc: '基于 Model Context Protocol 构建的 AI 工具链，实现模型与外部工具的无缝集成。',
+    tags: ['TypeScript', 'MCP', 'Node.js'],
     icon: <Layers size={20} />,
     color: '#C5C8FF',
-    status: 'RESEARCH',
+    status: 'ACTIVE',
     link: '#',
   },
   {
     id: '04',
-    title: 'MCP 协议工具链',
-    desc: '基于 Model Context Protocol 构建的 AI 工具链，实现模型与外部工具的无缝集成。',
-    tags: ['TypeScript', 'MCP', 'Node.js'],
+    title: 'RLHF 数据标注系统',
+    desc: '为大语言模型训练构建的高效 RLHF 数据标注工作流，支持多维度评分、质量控制与一致性验证，累计标注超 50K 条高质量数据。',
+    tags: ['Python', 'React', 'MongoDB'],
     icon: <Github size={20} />,
     color: '#A0A4F8',
     status: 'ACTIVE',
@@ -172,8 +172,8 @@ export default function Home() {
                   className="text-base leading-relaxed mb-8 max-w-md"
                   style={{ color: '#6B6B6B', fontFamily: 'Inter, sans-serif' }}
                 >
-                  专注于 AI 数据工程与模型对齐研究，探索脑机接口与底层系统的交汇地带。
-                  曾服役于火箭军，现转型为 AI 训练师，相信技术可以重塑认知边界。
+                  专注于 AI 数据工程与模型对齐研究，探索 Agent 架构与底层系统的交汇地带。
+                  曾服役于火箭军，受到过习主席检阅，现转型为 AI 训练师，相信技术可以重塑认知边界。
                 </motion.p>
 
                 {/* CTA Buttons */}
