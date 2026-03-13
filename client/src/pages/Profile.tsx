@@ -9,7 +9,7 @@ import { Link } from 'wouter';
 import { MapPin, Mail, Github, BookOpen, Award, Cpu, Code2, ChevronRight, ArrowRight } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 
-const AVATAR_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/hero-avatar-MYmpxB9zZdZ74Vq8bwruYg.webp';
+const AVATAR_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/avatar_cat_2b4a0042.jpg';
 const PROFILE_BG_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/profile-card-bg-mNT25FaS9nxYVGtFF3nh4t.webp';
 
 type TabId = 'info' | 'skills';
@@ -20,13 +20,13 @@ const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
 ];
 
 const infoItems = [
-  { icon: '👤', label: '姓名', value: 'Miracle Wu（吴奇迹）' },
-  { icon: '📍', label: '所在地', value: '中国' },
+  { icon: '👤', label: '姓名', value: 'Miracle Wu' },
+  { icon: '📍', label: '所在地', value: '中国北京' },
   { icon: '🎓', label: '学历', value: '计算机科学 本科在读' },
   { icon: '💼', label: '职业', value: 'AI Trainer · 数据标注工程师' },
   { icon: '🪖', label: '经历', value: '火箭军退伍士兵（2年服役）' },
-  { icon: '🔬', label: '研究方向', value: 'BCI 脑机接口 · LLM 对齐' },
-  { icon: '📧', label: '邮箱', value: 'miracle.wu@example.com' },
+  { icon: '🔬', label: '研究方向', value: '智能体工作流 (Agentic Workflow) · RAG 架构\n多模态交互 (MI) · 提示词工程 (PE)' },
+  { icon: '📧', label: '邮箱', value: 'wjq13307822575@gmail.com' },
   { icon: '🌐', label: 'GitHub', value: 'github.com/miracle-wu' },
 ];
 
@@ -83,18 +83,18 @@ const experiences = [
   },
   {
     period: '2021 — 2023',
-    role: '火箭军 · 技术士官',
+    role: '火箭军 · 技术战士',
     org: '中国人民解放军火箭军',
-    desc: '服役两年，担任技术士官，负责通信设备维护与技术保障，培养了严谨的工程思维与团队协作能力。',
+    desc: '服役两年，担任技术战士，负责通信设备维护与技术保障，培养了严谨的工程思维与团队协作能力。',
     tags: ['Leadership', 'Engineering', 'Discipline'],
     icon: '🚀',
   },
   {
     period: '2021 — 至今',
     role: '计算机科学 本科生',
-    org: '某重点高校',
-    desc: '主修计算机科学，专注于人工智能与系统方向，参与 BCI 脑机接口实验室研究项目。',
-    tags: ['CS', 'AI Research', 'BCI'],
+    org: '北京交通大学',
+    desc: '主修计算机科学，专注于人工智能与系统方向，参与 AI 数据处理项目，主要负责数据分析与数据清洗相关任务。',
+    tags: ['CS', 'AI Research', 'Data Processing'],
     icon: '🎓',
   },
 ];
@@ -188,12 +188,9 @@ export default function Profile() {
                     />
                   </div>
 
-                  <h2 className="text-xl font-bold mb-0.5" style={{ fontFamily: 'Playfair Display, serif', color: '#2D2D2D' }}>
+                  <h2 className="text-xl font-bold mb-3" style={{ fontFamily: 'Playfair Display, serif', color: '#2D2D2D' }}>
                     Miracle Wu
                   </h2>
-                  <p className="text-xs mb-3" style={{ color: '#9B9B9B', fontFamily: 'JetBrains Mono, monospace' }}>
-                    吴 · 奇迹
-                  </p>
 
                   {/* Tags */}
                   <div className="flex flex-wrap gap-1.5 mb-4">
@@ -216,7 +213,7 @@ export default function Profile() {
                   {/* Location */}
                   <div className="flex items-center gap-1.5 mb-4">
                     <MapPin size={12} style={{ color: '#8E94F2' }} />
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8rem', color: '#6B6B6B' }}>中国</span>
+                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8rem', color: '#6B6B6B' }}>中国北京</span>
                   </div>
 
                   {/* Stats */}
@@ -313,12 +310,12 @@ export default function Profile() {
                       <p className="section-label mb-4">PERSONAL_INFORMATION</p>
                       <div className="space-y-4">
                         {infoItems.map((item) => (
-                          <div key={item.label} className="flex items-center gap-4 py-2 border-b last:border-b-0" style={{ borderColor: 'rgba(0,0,0,0.04)' }}>
-                            <span className="text-lg w-6 flex-shrink-0">{item.icon}</span>
+                          <div key={item.label} className="flex items-start gap-4 py-2 border-b last:border-b-0" style={{ borderColor: 'rgba(0,0,0,0.04)' }}>
+                            <span className="text-lg w-6 flex-shrink-0 mt-0.5">{item.icon}</span>
                             <span className="text-sm w-20 flex-shrink-0" style={{ color: '#9B9B9B', fontFamily: 'Inter, sans-serif' }}>
                               {item.label}
                             </span>
-                            <span className="text-sm font-medium" style={{ color: '#2D2D2D', fontFamily: 'Inter, sans-serif' }}>
+                            <span className="text-sm font-medium whitespace-pre-line" style={{ color: '#2D2D2D', fontFamily: 'Inter, sans-serif' }}>
                               {item.value}
                             </span>
                           </div>
