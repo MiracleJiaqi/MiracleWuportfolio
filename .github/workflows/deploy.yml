@@ -38,8 +38,3 @@ jobs:
         SOURCE: "dist/"
         TARGET: "/PersonalWeb/dist"
         ARGS: "-avzr --delete"
-        SCRIPT_AFTER: |
-          pkill -f "node dist/index.js" || true
-          cd /PersonalWeb
-          nohup node dist/index.js > app.log 2>&1 &
-          echo "✅ 部署完成"
