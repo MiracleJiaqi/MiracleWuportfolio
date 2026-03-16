@@ -1,0 +1,43 @@
+name: 部署到京东云
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 安装 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: 安装 pnpm
+      uses: pnpm/action-setup@v4
+
+    - name: 安装依赖
+      run: pnpm install --frozen-lockfile
+
+    - name: 构建项目
+      run: pnpm build
+
+    - name: 部署到服务器
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        REMOTE_HOST: 36.151.148.84
+        REMOTE_USER: root
+        SOURCE: "dist/"
+        TARGET: "/PersonalWeb/dist"
+        ARGS: "-avzr --delete"
+        SCRIPT_AFTER: |
+          echo "=== 重启服务 ==="
+          pkill -f "node dist/index.js" || true
+          cd /PersonalWeb
+          nohup node dist/index.js > app.log 2>&1 &
+          echo "✅ 部署完成"
