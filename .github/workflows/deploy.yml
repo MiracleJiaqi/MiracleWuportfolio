@@ -35,6 +35,9 @@ jobs:
         SOURCE: "dist/"
         TARGET: "/PersonalWeb/dist"
         ARGS: "-avzr --delete"
+        SCRIPT_BEFORE: |
+          echo "=== 清空旧文件 ==="
+          rm -rf /PersonalWeb/dist/*
         SCRIPT_AFTER: |
           echo "=== 重启服务 ==="
           pkill -f "node dist/index.js" || true
