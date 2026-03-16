@@ -26,20 +26,33 @@ jobs:
     - name: 构建项目
       run: pnpm build
 
-    - name: 部署到服务器
-      uses: easingthemes/ssh-deploy@main
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        REMOTE_HOST: 36.151.148.84
-        REMOTE_USER: root
-        SOURCE: "dist/"
-        TARGET: "/PersonalWeb/dist"
-        ARGS: "-avzr --delete"
-        SCRIPT_BEFORE: |
-          echo "=== 清空旧文件 ==="
+    - name: 清空服务器旧文件
+      uses: appleboy/ssh-action@master
+      with:
+        host: 36.151.148.84
+        username: root
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
           rm -rf /PersonalWeb/dist/*
-        SCRIPT_AFTER: |
-          echo "=== 重启服务 ==="
+          mkdir -p /PersonalWeb/dist
+
+    - name: 上传文件到服务器
+      uses: appleboy/scp-action@master
+      with:
+        host: 36.151.148.84
+        username: root
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "dist/*"
+        target: "/PersonalWeb/"
+        strip_components: 0
+
+    - name: 重启服务
+      uses: appleboy/ssh-action@master
+      with:
+        host: 36.151.148.84
+        username: root
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
           pkill -f "node dist/index.js" || true
           cd /PersonalWeb
           nohup node dist/index.js > app.log 2>&1 &
