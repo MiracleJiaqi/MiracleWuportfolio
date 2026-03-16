@@ -383,6 +383,30 @@ export default function Profile() {
                         ))}
                       </div>
                     </div>
+
+                    {/* Cert / Awards */}
+                    <div className="geek-card p-6">
+                      <div className="flex items-center gap-2 mb-5">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>
+                          <Award size={16} />
+                        </div>
+                        <p className="section-label">CERTIFICATIONS & AWARDS</p>
+                      </div>
+                      <div className="space-y-3">
+                        {[
+                          { title: '火箭军优秀士兵', year: '2023', icon: '🏅' },
+                          { title: '且曼学院 19 期学员', year: '2026', icon: '🎓' },
+                        ].map((cert, i) => (
+                          <div key={i} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(142,148,242,0.04)' }}>
+                            <span className="text-lg">{cert.icon}</span>
+                            <div className="flex-1">
+                              <span className="text-sm font-medium" style={{ color: '#2D2D2D', fontFamily: 'Inter, sans-serif' }}>{cert.title}</span>
+                            </div>
+                            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#9B9B9B' }}>{cert.year}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </motion.div>
                 )}
 
@@ -437,30 +461,6 @@ export default function Profile() {
                         </div>
                       </div>
                     ))}
-
-                    {/* Cert / Awards */}
-                    <div className="geek-card p-6">
-                      <div className="flex items-center gap-2 mb-5">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>
-                          <Award size={16} />
-                        </div>
-                        <p className="section-label">CERTIFICATIONS & AWARDS</p>
-                      </div>
-                      <div className="space-y-3">
-                        {[
-                          { title: '火箭军优秀士兵', year: '2023', icon: '🏅' },
-                          { title: '且曼学院 19 期学员', year: '2026', icon: '🎓' },
-                        ].map((cert, i) => (
-                          <div key={i} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(142,148,242,0.04)' }}>
-                            <span className="text-lg">{cert.icon}</span>
-                            <div className="flex-1">
-                              <span className="text-sm font-medium" style={{ color: '#2D2D2D', fontFamily: 'Inter, sans-serif' }}>{cert.title}</span>
-                            </div>
-                            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.65rem', color: '#9B9B9B' }}>{cert.year}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
