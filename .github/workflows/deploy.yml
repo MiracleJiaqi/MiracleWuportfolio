@@ -38,3 +38,7 @@ jobs:
         SOURCE: "dist/"
         TARGET: "/PersonalWeb/dist"
         ARGS: "-avzr --delete"
+        SCRIPT_AFTER: |
+          echo "📦 文件已上传到宿主机"
+          docker exec GSManager3 nginx -s reload
+          echo "✅ Nginx已重载，部署完成！"

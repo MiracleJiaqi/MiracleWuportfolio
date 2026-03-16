@@ -111,7 +111,7 @@ const interests: InterestItem[] = [
     emoji: '🌌',
     title: '科幻 & 技术哲学',
     subtitle: 'Sci-Fi & Tech Philosophy',
-    level: 78,
+    level: 72,
     levelLabel: 'ENTHUSIAST',
     color: '#D4D6FF',
     desc: '热爱硬科幻文学，思考 AI 伦理、人机融合与技术奇点的哲学命题。',
