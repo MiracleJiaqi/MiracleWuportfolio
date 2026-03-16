@@ -41,58 +41,33 @@ jobs:
     - name: 构建项目
       run: pnpm build
 
-    - name: 设置 SSH 密钥
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-        chmod 600 ~/.ssh/deploy_key
-        ssh-keyscan -t ed25519 ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
-
     - name: 部署到服务器
-      run: |
-        echo "=== 开始部署 ==="
-        
-        # 上传文件
-        echo "=== 上传文件到服务器 ==="
-        ssh -i ~/.ssh/deploy_key -o ConnectTimeout=10 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-          "mkdir -p /PersonalWeb/dist/public && chmod -R 755 /PersonalWeb"
-        
-        # 使用 rsync 同步文件
-        rsync -avz -e "ssh -i ~/.ssh/deploy_key -o ConnectTimeout=10" \
-          dist/public/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/PersonalWeb/dist/public/
-        
-        echo "=== 验证 Nginx 配置 ==="
-        ssh -i ~/.ssh/deploy_key -o ConnectTimeout=10 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOSSH'
-          # 检查 Nginx 配置是否正确
-          if grep -q "root /PersonalWeb/dist/public" /etc/nginx/sites-available/portfolio; then
-            echo "✅ Nginx 配置正确"
-          else
-            echo "⚠️ 修复 Nginx 配置..."
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        REMOTE_HOST: ${{ secrets.SERVER_HOST }}
+        REMOTE_USER: ${{ secrets.SERVER_USER }}
+        SOURCE: "dist/public/"
+        TARGET: "/PersonalWeb/dist/public"
+        ARGS: "-avzr --delete"
+        SCRIPT_BEFORE: |
+          echo "=== 准备部署目录 ==="
+          mkdir -p /PersonalWeb/dist/public
+          chmod -R 755 /PersonalWeb
+        SCRIPT_AFTER: |
+          echo "=== 验证 Nginx 配置 ==="
+          if ! grep -q "root /PersonalWeb/dist/public" /etc/nginx/sites-available/portfolio; then
+            echo "修复 Nginx 配置..."
             sudo sed -i 's|root /PersonalWeb/dist;|root /PersonalWeb/dist/public;|g' /etc/nginx/sites-available/portfolio
-            echo "✅ Nginx 配置已修复"
           fi
           
-          # 验证 Nginx 语法
           echo "=== 验证 Nginx 语法 ==="
           sudo nginx -t
           
-          # 重启 Nginx
           echo "=== 重启 Nginx ==="
           sudo service nginx reload || sudo /etc/init.d/nginx reload
           
-          # 验证部署
           echo "=== 验证部署 ==="
           echo "文件大小:"
           ls -lh /PersonalWeb/dist/public/index.html
-          echo ""
-          echo "首行内容:"
-          head -1 /PersonalWeb/dist/public/index.html
-          
           echo "✅ 部署完成"
-        EOSSH
-
-    - name: 部署失败处理
-      if: failure()
-      run: |
-        echo "❌ 部署失败，请检查日志"
-        exit 1
