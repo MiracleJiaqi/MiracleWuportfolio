@@ -23,6 +23,9 @@ jobs:
     - name: 安装依赖
       run: pnpm install --frozen-lockfile
 
+    - name: 清除构建缓存
+      run: rm -rf dist node_modules/.vite
+
     - name: 构建项目
       run: pnpm build
 
