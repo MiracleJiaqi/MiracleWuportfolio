@@ -449,7 +449,7 @@ export default function Profile() {
                       <div className="space-y-3">
                         {[
                           { title: '火箭军优秀士兵', year: '2023', icon: '🏅' },
-                          { title: '且曼学院 19 期学员', year: '2024', icon: '🎓' },
+                          { title: '且曼学院 19 期学员', year: '2026', icon: '🎓' },
                         ].map((cert, i) => (
                           <div key={i} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(142,148,242,0.04)' }}>
                             <span className="text-lg">{cert.icon}</span>

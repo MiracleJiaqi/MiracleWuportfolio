@@ -11,6 +11,8 @@ import Profile from "./pages/Profile";
 import Interests from "./pages/Interests";
 import Connect from "./pages/Connect";
 import { AnimatePresence } from "framer-motion";
+import { useScrollToTop } from "./hooks/useScrollToTop";
+
 function Router() {
   const [location] = useLocation();
   return (
@@ -28,6 +30,7 @@ function Router() {
 }
 
 function App() {
+  useScrollToTop();
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
