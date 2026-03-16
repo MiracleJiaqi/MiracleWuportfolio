@@ -8,7 +8,7 @@ import { Link } from 'wouter';
 import { ArrowRight, Github, ExternalLink, Code2, Cpu, Layers, ChevronDown } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 
-const AVATAR_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/avatar_cat_2b4a0042.jpg';
+const AVATAR_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/myCat_ccc46f29.png';
 
 const projects = [
   {
