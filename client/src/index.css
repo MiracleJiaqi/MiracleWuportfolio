@@ -133,11 +133,6 @@
     padding-right: 1rem;
   }
 
-  .flex {
-    min-height: 0;
-    min-width: 0;
-  }
-
   @media (min-width: 640px) {
     .container {
       padding-left: 1.5rem;
@@ -289,9 +284,10 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Input focus ring override */
-input:focus, textarea:focus {
-  outline: none;
+/* Input focus ring — use custom ring, don't remove outline globally */
+input:focus-visible, textarea:focus-visible {
+  outline: 2px solid rgba(142, 148, 242, 0.5);
+  outline-offset: 1px;
 }
 
 /* Gradient text utility */

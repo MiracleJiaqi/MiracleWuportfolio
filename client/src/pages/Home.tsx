@@ -7,49 +7,50 @@ import { motion } from 'framer-motion';
 import { Link } from 'wouter';
 import { ArrowRight, Github, ExternalLink, Code2, Cpu, Layers, ChevronDown } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
+import { useSEO } from '../hooks/useSEO';
 
 const AVATAR_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/myCat_ccc46f29.png';
 
 const projects = [
   {
     id: '01',
-    title: '多模态数据链路搭建',
-    desc: '设计并实现了支持文本、图像、音频多模态的数据处理管道，集成了预处理、特征提取、数据验证等核心模块，为大规模 AI 模型训练提供高质量数据源。',
-    tags: ['Python', 'FastAPI', 'React'],
+    title: '实时语音交互项目',
+    desc: '围绕 Step 系列实时语音对话场景，主导内容质量评测与 Benchmark 构建，重点覆盖社交迎合、情感陪伴等特殊交互场景，推动评测标准从零到一落地。',
+    tags: ['Benchmark', 'Evaluation', 'Voice AI'],
     icon: <Cpu size={20} />,
     color: '#8E94F2',
     status: 'ACTIVE',
-    link: '#',
+    link: 'https://icn2od9gkeiv.feishu.cn/wiki/LeKIwtHkLidfFBk8KiMcvwQTnME',
   },
   {
     id: '02',
-    title: 'x86 汇编模拟器',
-    desc: '基于 C++ 实现的 x86 指令集模拟器，支持寄存器操作与内存管理可视化调试。',
-    tags: ['C++', 'x86 ASM', 'Qt'],
+    title: '文心快码 VSCode 插件评测',
+    desc: '面向代码助手场景，构建覆盖代码生成、补全、问题修复等任务的评测集，结合竞品横评与多维评估方案，直接服务插件版本迭代与质量决策。',
+    tags: ['Code Eval', 'Benchmark', 'VSCode'],
     icon: <Code2 size={20} />,
     color: '#B8BCFF',
     status: 'DONE',
-    link: '#',
+    link: 'https://icn2od9gkeiv.feishu.cn/wiki/OJY7w0u5HiYkYakaKNhcJSZ2nNS?from=from_copylink',
   },
   {
     id: '03',
-    title: 'MCP 协议工具链',
-    desc: '基于 Model Context Protocol 构建的 AI 工具链，实现模型与外部工具的无缝集成。',
-    tags: ['TypeScript', 'MCP', 'Node.js'],
+    title: '自动化提效总结',
+    desc: '结合结构化 Prompt、Python 脚本与工作流工具，将数据生产、清洗、质检与分析串成半自动化 Pipeline，有效提升评测链路效率与结果复用性。',
+    tags: ['Python', 'Pipeline', '自动化'],
     icon: <Layers size={20} />,
     color: '#C5C8FF',
     status: 'ACTIVE',
-    link: '#',
+    link: 'https://icn2od9gkeiv.feishu.cn/wiki/Am2Lw4GpKiLRNFkw7y4csu7Jnkf?from=from_copylink',
   },
   {
     id: '04',
-    title: 'RLHF 数据标注系统',
-    desc: '为大语言模型训练构建的高效 RLHF 数据标注工作流，支持多维度评分、质量控制与一致性验证，累计标注超 50K 条高质量数据。',
-    tags: ['Python', 'React', 'MongoDB'],
+    title: '持续更新中…… ✊',
+    desc: '持续积累 AI 评测、Prompt 工程与自动化流程的实践经验，边做边迭代，沉淀可复用的方法论与工程模板。',
+    tags: ['AI Eval', 'Prompt', 'In Progress'],
     icon: <Github size={20} />,
     color: '#A0A4F8',
     status: 'ACTIVE',
-    link: '#',
+    link: '',
   },
 ];
 
@@ -102,6 +103,11 @@ const itemVariants = {
 };
 
 export default function Home() {
+  useSEO({
+    title: 'Miracle Wu · AI Evaluation, Data Training & CS Student',
+    description: '北京交通大学计算机在读，聚焦 AI 评测、数据训练与自动化 Pipeline，关注 Prompt 工程、Agent 工作流与系统化落地。',
+  });
+
   return (
     <PageTransition>
       <main style={{ background: 'transparent' }}>
@@ -193,14 +199,14 @@ export default function Home() {
                       了解我 <ArrowRight size={16} />
                     </motion.button>
                   </Link>
-                  <Link href="/connect">
+                  <Link href="/archive">
                     <motion.button
                       className="flex items-center gap-2 px-6 py-3 rounded-2xl font-medium text-sm"
                       style={{ background: 'white', color: '#8E94F2', border: '1.5px solid rgba(142,148,242,0.3)' }}
                       whileHover={{ scale: 1.05, borderColor: '#8E94F2', boxShadow: '0 4px 16px rgba(142,148,242,0.15)' }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      交个朋友 🤝
+                      浏览足迹 📸
                     </motion.button>
                   </Link>
                 </motion.div>
@@ -307,7 +313,9 @@ export default function Home() {
                 <motion.div
                   key={project.id}
                   variants={itemVariants}
-                  className="geek-card p-6 group cursor-pointer"
+                  className="geek-card p-6 group"
+                  style={{ cursor: project.link ? 'pointer' : 'default' }}
+                  onClick={() => project.link && window.open(project.link, '_blank', 'noopener,noreferrer')}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div
@@ -358,12 +366,18 @@ export default function Home() {
                         </span>
                       ))}
                     </div>
-                    <motion.div
-                      whileHover={{ x: 3 }}
-                      style={{ color: '#C5C8FF' }}
-                    >
-                      <ExternalLink size={14} />
-                    </motion.div>
+                    {project.link ? (
+                      <motion.div
+                        whileHover={{ x: 3 }}
+                        style={{ color: '#C5C8FF' }}
+                      >
+                        <ExternalLink size={14} />
+                      </motion.div>
+                    ) : (
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem', color: '#C5C8FF' }}>
+                        SOON
+                      </span>
+                    )}
                   </div>
                 </motion.div>
               ))}
@@ -483,22 +497,22 @@ export default function Home() {
                 }}
               />
               <div className="relative z-10">
-                <p className="section-label mb-4">03 / CONNECT</p>
+                <p className="section-label mb-4">03 / ARCHIVE</p>
                 <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: 'Playfair Display, serif', color: '#2D2D2D' }}>
-                  一起构建有意义的东西 🌌
+                  做过什么，比说过什么更真实 🌌
                 </h2>
                 <p className="text-sm mb-8 max-w-md mx-auto" style={{ color: '#6B6B6B', fontFamily: 'Inter, sans-serif' }}>
-                  无论是 AI 研究合作、技术交流，还是单纯想认识一个有趣的灵魂，我都期待与你的连接。
+                  生活瞬间、项目过程、自动化成果与 AI 创作——这里记录真实发生的事。
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
-                  <Link href="/connect">
+                  <Link href="/archive">
                     <motion.button
                       className="flex items-center gap-2 px-6 py-3 rounded-2xl text-white font-medium text-sm"
                       style={{ background: 'linear-gradient(135deg, #8E94F2, #6B72E8)' }}
                       whileHover={{ scale: 1.05, boxShadow: '0 8px 24px rgba(142,148,242,0.4)' }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      发起连接请求 <ArrowRight size={16} />
+                      浏览足迹 <ArrowRight size={16} />
                     </motion.button>
                   </Link>
                   <Link href="/interests">
@@ -517,19 +531,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="py-8 border-t" style={{ borderColor: 'rgba(142,148,242,0.1)' }}>
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#9B9B9B' }}>
-              © 2026 Miracle Wu · Built with ⚡
-            </p>
-            <Link href="/">
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#8E94F2', cursor: 'pointer' }}>
-                返回首页 ↑
-              </span>
-            </Link>
-          </div>
-        </footer>
       </main>
     </PageTransition>
   );

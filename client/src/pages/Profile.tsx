@@ -6,8 +6,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
-import { MapPin, Mail, Github, BookOpen, Award, Cpu, Code2, ChevronRight, ArrowRight } from 'lucide-react';
+import { MapPin, Mail, Github, Award, ChevronRight, ArrowRight, Download, BookOpen, Cpu } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
+import { useSEO } from '../hooks/useSEO';
 
 const AVATAR_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/myCat_ccc46f29.png';
 const PROFILE_BG_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/profile-card-bg-mNT25FaS9nxYVGtFF3nh4t.webp';
@@ -27,50 +28,58 @@ const infoItems = [
   { icon: '🪖', label: '经历', value: '火箭军退伍士兵（2年服役）' },
   { icon: '🔬', label: '研究方向', value: '智能体工作流 (Agentic Workflow) · RAG 架构\n多模态交互 (MI) · 提示词工程 (PE)' },
   { icon: '📧', label: '邮箱', value: 'wjq13307822575@gmail.com' },
-  { icon: '🌐', label: 'GitHub', value: 'github.com/miracle-wu' },
+  { icon: '🌐', label: 'GitHub', value: 'github.com/MiracleJiaqi' },
 ];
 
-interface SkillGroup {
-  category: string;
-  icon: React.ReactNode;
-  color: string;
-  skills: { name: string; level: number; desc: string }[];
+interface CapabilityCard {
+  icon: string;
+  title: string;
+  titleEn: string;
+  label: string;
+  desc: string;
+  tags: string[];
 }
 
-const skillGroups: SkillGroup[] = [
+const capabilities: CapabilityCard[] = [
   {
-    category: 'AI & Machine Learning',
-    icon: <Cpu size={16} />,
-    color: '#8E94F2',
-    skills: [
-      { name: 'Python / PyTorch', level: 88, desc: 'LLM 训练 · 数据管道' },
-      { name: 'RLHF / 数据标注', level: 92, desc: 'AI Trainer 核心技能' },
-      { name: 'MCP Protocol', level: 85, desc: '工具链集成 · Agent 开发' },
-
-    ],
+    icon: '⚡',
+    title: 'VibeCoding',
+    titleEn: 'AI-Assisted Development',
+    label: '基本掌握',
+    desc: '能围绕真实业务做渐进式改动，先跑通流程，再针对瓶颈优化。在数据生产较慢时，通过并发生产、分步骤生成、迭代 Prompt、切换更合适模型来提效。',
+    tags: ['AI Coding', 'Iteration', 'Optimization'],
   },
   {
-    category: 'Systems & Low-Level',
-    icon: <Code2 size={16} />,
-    color: '#B8BCFF',
-    skills: [
-      { name: 'x86 汇编', level: 82, desc: '指令集 · 中断处理 · 调试' },
-      { name: 'C / C++', level: 30, desc: '系统编程 · 数据结构' },
-      { name: 'Linux / Shell', level: 75, desc: '系统管理 · 自动化脚本' },
-      { name: '算法与数据结构', level: 30, desc: '持续学习中 · 基础扎实' },
-    ],
+    icon: '📝',
+    title: 'PE 工程',
+    titleEn: 'Prompt Engineering',
+    label: '基本掌握',
+    desc: '能把业务需求转成结构化 Prompt，设计生成约束、输出格式和质量标准，支持规模化内容生产与评测数据构建。',
+    tags: ['Prompt', 'Benchmark', 'LLM'],
   },
   {
-    category: 'Frontend & Tools',
-    icon: <BookOpen size={16} />,
-    color: '#C5C8FF',
-    skills: [
-      { name: 'TypeScript / React', level: 12, desc: '全栈开发 · 组件设计' },
-      { name: 'Node.js / FastAPI', level: 15, desc: 'API 开发 · 微服务' },
-      { name: 'Git / Docker', level: 20, desc: '版本控制 · 容器化部署' },
-    ],
+    icon: '🔧',
+    title: '自动化 Pipeline',
+    titleEn: 'Automation Workflow',
+    label: '基本掌握',
+    desc: '通过 Python 脚本、工作流工具（影刀、Eagle）结合模型能力，把数据采集、清洗、生成、质检、分析串成半自动化流程。',
+    tags: ['Python', '自动化', 'Pipeline'],
+  },
+  {
+    icon: '📊',
+    title: '评测全流程',
+    titleEn: 'Evaluation & QA',
+    label: '基本掌握',
+    desc: '熟悉评测项目全流程：需求理解 → 维度确定 → 准备爬坡 → 正式评测 → 结果交付 → 项目复盘，具备独立交付评测任务的能力。',
+    tags: ['评测', 'Benchmark', 'AI', 'Quality Control'],
   },
 ];
+
+const labelStyle: Record<string, { bg: string; text: string; border: string }> = {
+  '基本掌握': { bg: 'rgba(142,148,242,0.08)', text: '#8E94F2', border: 'rgba(142,148,242,0.25)' },
+  '熟练':     { bg: 'rgba(74,222,128,0.08)',  text: '#16a34a', border: 'rgba(74,222,128,0.25)' },
+  '探索中':   { bg: 'rgba(245,158,11,0.08)',  text: '#d97706', border: 'rgba(245,158,11,0.25)' },
+};
 
 const experiences = [
   {
@@ -99,22 +108,12 @@ const experiences = [
   },
 ];
 
-function SkillBar({ level, color, delay = 0 }: { level: number; color: string; delay?: number }) {
-  return (
-    <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(142,148,242,0.1)' }}>
-      <motion.div
-        className="absolute top-0 left-0 h-full rounded-full"
-        style={{ background: `linear-gradient(90deg, ${color}, ${color}99)` }}
-        initial={{ width: 0 }}
-        whileInView={{ width: `${level}%` }}
-        viewport={{ once: true }}
-        transition={{ duration: 1.2, delay, type: 'spring', stiffness: 50 }}
-      />
-    </div>
-  );
-}
-
 export default function Profile() {
+  useSEO({
+    title: '个人简介 · Miracle Wu',
+    description: '北京交通大学计算机本科在读，具备多模态评测、Benchmark 构建、评测 SOP 拆解与自动化提效经验。',
+  });
+
   const [activeTab, setActiveTab] = useState<TabId>('info');
 
   return (
@@ -238,9 +237,9 @@ export default function Profile() {
                   </div>
 
                   {/* Social Links */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mb-2">
                     <motion.a
-                      href="https://github.com"
+                      href="https://github.com/MiracleJiaqi"
                       target="_blank"
                       rel="noreferrer"
                       className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs"
@@ -251,7 +250,7 @@ export default function Profile() {
                       <Github size={12} /> GitHub
                     </motion.a>
                     <motion.a
-                      href="mailto:miracle.wu@example.com"
+                      href="mailto:wjq13307822575@gmail.com"
                       className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs"
                       style={{ background: 'rgba(142,148,242,0.1)', color: '#8E94F2', fontFamily: 'Inter, sans-serif' }}
                       whileHover={{ scale: 1.03 }}
@@ -260,6 +259,36 @@ export default function Profile() {
                       <Mail size={12} /> 邮件
                     </motion.a>
                   </div>
+
+                  {/* 下载简历 */}
+                  <motion.a
+                    href="/resume.pdf"
+                    download="Miracle_Wu_Resume.pdf"
+                    className="flex w-full items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(142,148,242,0.12), rgba(184,188,255,0.08))',
+                      color: '#8E94F2',
+                      border: '1.5px solid rgba(142,148,242,0.2)',
+                      fontFamily: 'Inter, sans-serif',
+                    }}
+                    whileHover={{ scale: 1.03, borderColor: '#8E94F2', background: 'rgba(142,148,242,0.12)' }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <Download size={12} />
+                    下载简历
+                    <span
+                      style={{
+                        fontFamily: 'JetBrains Mono, monospace',
+                        fontSize: '0.5rem',
+                        background: 'rgba(142,148,242,0.15)',
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      PDF
+                    </span>
+                  </motion.a>
                 </div>
               </div>
             </motion.div>
@@ -395,48 +424,80 @@ export default function Profile() {
                     transition={{ duration: 0.3 }}
                     className="space-y-6"
                   >
-                    {skillGroups.map((group, gi) => (
-                      <div key={gi} className="geek-card p-6">
-                        <div className="flex items-center gap-2 mb-5">
-                          <div
-                            className="w-7 h-7 rounded-lg flex items-center justify-center"
-                            style={{ background: `${group.color}20`, color: group.color }}
+                    {/* Capability Cards — 2-column grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {capabilities.map((cap, i) => {
+                        const ls = labelStyle[cap.label] ?? labelStyle['基本掌握'];
+                        return (
+                          <motion.div
+                            key={i}
+                            className="geek-card p-5 flex flex-col gap-3"
+                            initial={{ opacity: 0, y: 12 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: i * 0.08 }}
                           >
-                            {group.icon}
-                          </div>
-                          <p className="section-label">{group.category}</p>
-                        </div>
-                        <div className="space-y-5">
-                          {group.skills.map((skill, si) => (
-                            <motion.div
-                              key={si}
-                              initial={{ opacity: 0 }}
-                              whileInView={{ opacity: 1 }}
-                              viewport={{ once: true }}
-                              transition={{ delay: si * 0.08 }}
-                            >
-                              <div className="flex items-center justify-between mb-1.5">
-                                <div>
-                                  <span className="text-sm font-medium" style={{ color: '#2D2D2D', fontFamily: 'Inter, sans-serif' }}>
-                                    {skill.name}
-                                  </span>
-                                  <span className="ml-2 text-xs" style={{ color: '#9B9B9B', fontFamily: 'Inter, sans-serif' }}>
-                                    {skill.desc}
-                                  </span>
-                                </div>
-                                <span
-                                  className="text-xs font-bold"
-                                  style={{ fontFamily: 'JetBrains Mono, monospace', color: group.color }}
+                            {/* Header */}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center gap-2.5">
+                                <div
+                                  className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                                  style={{ background: 'rgba(142,148,242,0.08)' }}
                                 >
-                                  {skill.level}%
-                                </span>
+                                  {cap.icon}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-semibold leading-tight" style={{ color: '#2D2D2D', fontFamily: 'Playfair Display, serif' }}>
+                                    {cap.title}
+                                  </p>
+                                  <p className="text-xs leading-tight mt-0.5" style={{ color: '#9B9B9B', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.6rem' }}>
+                                    {cap.titleEn}
+                                  </p>
+                                </div>
                               </div>
-                              <SkillBar level={skill.level} color={group.color} delay={si * 0.1} />
-                            </motion.div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                              {/* Label badge */}
+                              <span
+                                className="text-xs px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5"
+                                style={{
+                                  background: ls.bg,
+                                  color: ls.text,
+                                  border: `1px solid ${ls.border}`,
+                                  fontFamily: 'Inter, sans-serif',
+                                  fontSize: '0.65rem',
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {cap.label}
+                              </span>
+                            </div>
+
+                            {/* Description */}
+                            <p className="text-xs leading-relaxed" style={{ color: '#6B6B6B', fontFamily: 'Inter, sans-serif' }}>
+                              {cap.desc}
+                            </p>
+
+                            {/* Tags */}
+                            <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
+                              {cap.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="text-xs px-2 py-0.5 rounded-lg"
+                                  style={{
+                                    fontFamily: 'JetBrains Mono, monospace',
+                                    background: 'rgba(142,148,242,0.06)',
+                                    color: '#8E94F2',
+                                    fontSize: '0.6rem',
+                                    border: '1px solid rgba(142,148,242,0.12)',
+                                  }}
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
 
                     {/* Cert / Awards */}
                     <div className="geek-card p-6">
@@ -487,19 +548,6 @@ export default function Profile() {
           </motion.div>
         </div>
 
-        {/* Footer */}
-        <footer className="py-8 border-t mt-8" style={{ borderColor: 'rgba(142,148,242,0.1)' }}>
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#9B9B9B' }}>
-              © 2026 Miracle Wu · Built with ⚡
-            </p>
-            <Link href="/">
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#8E94F2', cursor: 'pointer' }}>
-                返回首页 ↑
-              </span>
-            </Link>
-          </div>
-        </footer>
       </main>
     </PageTransition>
   );

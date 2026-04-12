@@ -6,13 +6,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Zap } from 'lucide-react';
+import { Menu, X, Zap, Download } from 'lucide-react';
 
 const navLinks = [
   { href: '/', label: '首页', en: 'Home' },
   { href: '/profile', label: '个人资料', en: 'Profile' },
   { href: '/interests', label: '兴趣爱好', en: 'Interests' },
-  { href: '/connect', label: '交个朋友', en: 'Connect' },
+  { href: '/archive', label: '足迹', en: 'Archive' },
 ];
 
 export default function Navbar() {
@@ -86,18 +86,49 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link href="/connect">
-              <motion.button
-                className="px-4 py-2 rounded-2xl text-sm font-medium text-white"
-                style={{ background: 'linear-gradient(135deg, #8E94F2, #6B72E8)', fontFamily: 'Inter, sans-serif' }}
-                whileHover={{ scale: 1.05, boxShadow: '0 4px 16px rgba(142,148,242,0.4)' }}
-                whileTap={{ scale: 0.95 }}
+          {/* CTA Buttons */}
+          <div className="hidden md:flex items-center gap-2">
+            {/* 下载简历 */}
+            <motion.a
+              href="/resume.pdf"
+              download="Miracle_Wu_Resume.pdf"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-medium"
+              style={{
+                background: 'transparent',
+                color: '#8E94F2',
+                border: '1.5px solid rgba(142,148,242,0.25)',
+                fontFamily: 'Inter, sans-serif',
+              }}
+              whileHover={{ scale: 1.05, borderColor: '#8E94F2', background: 'rgba(142,148,242,0.06)' }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Download size={12} />
+              下载简历
+              <span
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: '0.5rem',
+                  background: 'rgba(142,148,242,0.12)',
+                  color: '#8E94F2',
+                  padding: '1px 4px',
+                  borderRadius: '4px',
+                  letterSpacing: '0.05em',
+                }}
               >
-                ✉ 联系我
-              </motion.button>
-            </Link>
+                PDF
+              </span>
+            </motion.a>
+
+            {/* 联系我 */}
+            <motion.a
+              href="mailto:wjq13307822575@gmail.com"
+              className="px-4 py-2 rounded-2xl text-sm font-medium text-white"
+              style={{ background: 'linear-gradient(135deg, #8E94F2, #6B72E8)', fontFamily: 'Inter, sans-serif' }}
+              whileHover={{ scale: 1.05, boxShadow: '0 4px 16px rgba(142,148,242,0.4)' }}
+              whileTap={{ scale: 0.95 }}
+            >
+              ✉ 联系我
+            </motion.a>
           </div>
 
           {/* Mobile Menu Button */}

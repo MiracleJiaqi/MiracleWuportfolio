@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
 import { ChevronRight, ChevronDown, ArrowRight } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
+import { useSEO } from '../hooks/useSEO';
 
 const COSMOS_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ/interests-cosmos-EBCJo36BUYEnFJK5iWG3qW.webp';
 
@@ -157,6 +158,11 @@ const cardVariants = {
 };
 
 export default function Interests() {
+  useSEO({
+    title: '兴趣方向 · Miracle Wu',
+    description: '聚焦大模型前沿、Agent 发展与 AI 产品演进，持续进行知识追踪、技术理解、自媒体创作与内容输出。',
+  });
+
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
@@ -455,32 +461,19 @@ export default function Interests() {
             viewport={{ once: true }}
             className="flex justify-end"
           >
-            <Link href="/connect">
+            <Link href="/archive">
               <motion.button
                 className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-medium text-white"
                 style={{ background: 'linear-gradient(135deg, #8E94F2, #6B72E8)', fontFamily: 'Inter, sans-serif' }}
                 whileHover={{ scale: 1.05, boxShadow: '0 8px 24px rgba(142,148,242,0.4)' }}
                 whileTap={{ scale: 0.95 }}
               >
-                前往交友表单 <ArrowRight size={14} />
+                了解我的足迹 <ArrowRight size={14} />
               </motion.button>
             </Link>
           </motion.div>
         </div>
 
-        {/* Footer */}
-        <footer className="py-8 border-t mt-8" style={{ borderColor: 'rgba(142,148,242,0.1)' }}>
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#9B9B9B' }}>
-              © 2026 Miracle Wu · Built with ⚡
-            </p>
-            <Link href="/">
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', color: '#8E94F2', cursor: 'pointer' }}>
-                返回首页 ↑
-              </span>
-            </Link>
-          </div>
-        </footer>
       </main>
     </PageTransition>
   );

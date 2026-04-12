@@ -5,11 +5,12 @@ import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import ParticleBackground from "./components/ParticleBackground";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Interests from "./pages/Interests";
-import Connect from "./pages/Connect";
+import Archive from "./pages/Archive";
 import { AnimatePresence } from "framer-motion";
 import { useScrollToTop } from "./hooks/useScrollToTop";
 
@@ -21,7 +22,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/profile" component={Profile} />
         <Route path="/interests" component={Interests} />
-        <Route path="/connect" component={Connect} />
+        <Route path="/archive" component={Archive} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
@@ -43,6 +44,7 @@ function App() {
           {/* Page content */}
           <div className="relative z-10 pt-16 min-h-screen" style={{ background: 'transparent' }}>
             <Router />
+            <Footer />
           </div>
         </TooltipProvider>
       </ThemeProvider>
