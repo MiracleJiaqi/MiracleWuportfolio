@@ -1,7 +1,8 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, adminProcedure } from "./_core/trpc";
+import { getArchiveItems, createArchiveItem, updateArchiveItem, deleteArchiveItem } from "./db";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -23,6 +24,22 @@ export const appRouter = router({
   //     db.getUserTodos(ctx.user.id)
   //   ),
   // }),
+
+  archive: router({
+    list: publicProcedure.query(async () => {
+      return await getArchiveItems();
+    }),
+    create: adminProcedure.mutation(async ({ ctx, input }) => {
+      return await createArchiveItem(input as any);
+    }),
+    update: adminProcedure.mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input as any;
+      return await updateArchiveItem(id, data);
+    }),
+    delete: adminProcedure.mutation(async ({ ctx, input }) => {
+      return await deleteArchiveItem(input as number);
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

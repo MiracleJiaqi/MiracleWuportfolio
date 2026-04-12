@@ -26,3 +26,22 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 // TODO: Add your tables here
+
+export const archiveItems = mysqlTable("archive_items", {
+  id: int("id").autoincrement().primaryKey(),
+  type: varchar("type", { length: 16 }).notNull(), // 'image' | 'bilibili' | 'youtube'
+  category: varchar("category", { length: 32 }).notNull(),
+  title: varchar("title", { length: 128 }).notNull(),
+  desc: text("desc"),
+  date: varchar("date", { length: 16 }),
+  src: text("src"),
+  bvid: varchar("bvid", { length: 32 }),
+  thumbnail: text("thumbnail"),
+  videoUrl: text("videoUrl"),
+  tags: text("tags"), // JSON array string
+  aspect: varchar("aspect", { length: 16 }).default("landscape"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ArchiveItem = typeof archiveItems.$inferSelect;
+export type InsertArchiveItem = typeof archiveItems.$inferInsert;

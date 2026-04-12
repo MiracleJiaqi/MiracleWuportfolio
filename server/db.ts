@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, archiveItems, InsertArchiveItem, ArchiveItem } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -87,6 +87,51 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+// Archive Items CRUD
+export async function getArchiveItems(): Promise<ArchiveItem[]> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get archive items: database not available");
+    return [];
+  }
+
+  const items = await db.select().from(archiveItems).orderBy(desc(archiveItems.createdAt));
+  return items;
+}
+
+export async function createArchiveItem(item: InsertArchiveItem): Promise<ArchiveItem> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db.insert(archiveItems).values(item);
+  // MySQL doesn't return inserted rows like PostgreSQL, so we fetch the newly created item
+  const created = await db.select().from(archiveItems).orderBy(desc(archiveItems.createdAt)).limit(1);
+  return created[0];
+}
+
+export async function updateArchiveItem(id: number, item: Partial<InsertArchiveItem>): Promise<ArchiveItem | null> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.update(archiveItems).set(item).where(eq(archiveItems.id, id));
+  const updated = await db.select().from(archiveItems).where(eq(archiveItems.id, id)).limit(1);
+  return updated.length > 0 ? updated[0] : null;
+}
+
+export async function deleteArchiveItem(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.delete(archiveItems).where(eq(archiveItems.id, id));
+  return true;
 }
 
 // TODO: add feature queries here as your schema grows.

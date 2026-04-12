@@ -5,7 +5,13 @@
       "Bash(tasklist:*)",
       "Bash(del ideas.md DEPLOYMENT.md nginx.conf drizzle.config.ts vitest.config.ts .prettierrc .prettierignore dist.tar.gz)",
       "Bash(node -e \"const fs=require\\(''fs''\\);[''ideas.md'',''DEPLOYMENT.md'',''nginx.conf'',''drizzle.config.ts'',''vitest.config.ts'',''.prettierrc'',''.prettierignore'',''dist.tar.gz''].forEach\\(f=>{try{fs.unlinkSync\\(f\\);console.log\\(''✓ ''+f\\)}catch\\(e\\){}}\\)\")",
-      "Bash(node -e \"const fs=require\\(''fs''\\);const path=require\\(''path''\\);function rmdir\\(dir\\){if\\(fs.existsSync\\(dir\\)\\){fs.rmSync\\(dir,{recursive:true,force:true}\\);console.log\\(''✓ ''+dir\\)}}rmdir\\(''.github''\\);rmdir\\(''client/public/__manus__''\\)\")"
+      "Bash(node -e \"const fs=require\\(''fs''\\);const path=require\\(''path''\\);function rmdir\\(dir\\){if\\(fs.existsSync\\(dir\\)\\){fs.rmSync\\(dir,{recursive:true,force:true}\\);console.log\\(''✓ ''+dir\\)}}rmdir\\(''.github''\\);rmdir\\(''client/public/__manus__''\\)\")",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(gh run:*)"
     ]
   }
 }

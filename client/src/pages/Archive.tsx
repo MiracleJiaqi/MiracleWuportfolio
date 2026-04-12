@@ -14,16 +14,17 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
-import { ChevronRight, X, Play, Settings, Plus, AlertTriangle, EyeOff, RotateCcw } from 'lucide-react';
+import { ChevronRight, X, Play, Settings, Plus, AlertTriangle } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 import { useSEO } from '../hooks/useSEO';
+import { trpc } from '../lib/trpc';
 
 // ── Types ──────────────────────────────────────────────────────────────
 type Category = 'moments' | 'bjtu' | 'past' | 'tech' | 'pipeline';
 type MediaType = 'image' | 'bilibili' | 'youtube';
 
 interface MediaItem {
-  id: string;
+  id: number;
   type: MediaType;
   category: Category;
   title: string;
@@ -35,17 +36,7 @@ interface MediaItem {
   thumbnail?: string;
   tags?: string[];
   aspect?: 'square' | 'landscape' | 'portrait';
-  _local?: boolean;
 }
-
-// ── LocalStorage ────────────────────────────────────────────────────────
-const LS_KEY        = 'mw_archive_items';
-const LS_HIDDEN_KEY = 'mw_archive_hidden';
-
-function loadLocalItems(): MediaItem[]  { try { return JSON.parse(localStorage.getItem(LS_KEY) ?? '[]'); } catch { return []; } }
-function saveLocalItems(items: MediaItem[]) { localStorage.setItem(LS_KEY, JSON.stringify(items)); }
-function loadHiddenIds(): string[]      { try { return JSON.parse(localStorage.getItem(LS_HIDDEN_KEY) ?? '[]'); } catch { return []; } }
-function saveHiddenIds(ids: string[])   { localStorage.setItem(LS_HIDDEN_KEY, JSON.stringify(ids)); }
 
 // ── URL Parsers ─────────────────────────────────────────────────────────
 function extractBvid(input: string): string { const m = input.match(/BV[A-Za-z0-9]+/); return m ? m[0] : input.trim(); }
@@ -64,18 +55,6 @@ const categories = [
 const categoryLabels: Record<string, string> = {
   moments: '片刻剪影', bjtu: 'BJTU', past: '往事且曼', tech: '技术追踪', pipeline: 'Pipeline 实践',
 };
-
-// ── Media Data ─────────────────────────────────────────────────────────
-const CDN = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663432020906/TNk97hFWUfMwRchz98LFoQ';
-
-const mediaItems: MediaItem[] = [
-  { id: '1', type: 'image',    category: 'moments',  title: '生活瞬间',          desc: '日常随拍，替换为你的真实照片',           date: '2026.03', src: `${CDN}/myCat_ccc46f29.png`,                                  tags: ['生活'],            aspect: 'square'    },
-  { id: '2', type: 'image',    category: 'tech',     title: '个人网站上线',      desc: '作品集网站截图，记录建站过程',           date: '2026.04', src: `${CDN}/profile-card-bg-mNT25FaS9nxYVGtFF3nh4t.webp`,        tags: ['项目', 'Web'],     aspect: 'landscape' },
-  { id: '3', type: 'bilibili', category: 'pipeline', title: '自动化 Pipeline 演示', desc: '脚本跑通后的流程录屏，替换为真实 BV 号', date: '2026.03', bvid: 'BV1GJ411x7h7', thumbnail: `${CDN}/hero-avatar-MYmpxB9zZdZ74Vq8bwruYg.webp`, tags: ['自动化', 'Python'], aspect: 'landscape' },
-  { id: '4', type: 'image',    category: 'tech',     title: 'AI 内容创作成果',   desc: '自媒体配图或封面设计，替换为真实素材', date: '2026.02', src: `${CDN}/hero-avatar-MYmpxB9zZdZ74Vq8bwruYg.webp`,           tags: ['AI', '内容创作'], aspect: 'portrait'  },
-  { id: '5', type: 'image',    category: 'pipeline', title: '评测数据可视化',    desc: '模型评测结果截图或数据图表',           date: '2026.03', src: `${CDN}/myCat_ccc46f29.png`,                                  tags: ['评测', 'Benchmark'], aspect: 'landscape' },
-  { id: '6', type: 'image',    category: 'bjtu',     title: '阶段性记录',        desc: '某个值得留下来的时刻',                 date: '2026.01', src: `${CDN}/hero-avatar-MYmpxB9zZdZ74Vq8bwruYg.webp`,           tags: ['BJTU', '记录'],   aspect: 'square'    },
-];
 
 // ── Helpers ────────────────────────────────────────────────────────────
 const aspectClass: Record<NonNullable<MediaItem['aspect']>, string> = {
@@ -150,12 +129,6 @@ function MediaCard({ item, index, adminMode, onClick, onRemove }: {
               </span>
             </div>
           )}
-          {item._local && (
-            <span className="absolute top-2 left-2 px-2 py-0.5 rounded-lg"
-              style={{ background: 'rgba(142,148,242,0.85)', color: 'white', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.5rem', backdropFilter: 'blur(4px)' }}>
-              本地
-            </span>
-          )}
           {!adminMode && (
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 55%)' }} />
@@ -196,7 +169,7 @@ function MediaCard({ item, index, adminMode, onClick, onRemove }: {
               color: 'white',
               zIndex: 10,
             }}
-            title={item._local ? '删除此内容' : '隐藏此内容'}
+            title="删除此内容"
           >
             <X size={13} strokeWidth={2.5} />
           </motion.button>
@@ -217,7 +190,7 @@ function MediaCard({ item, index, adminMode, onClick, onRemove }: {
   );
 }
 
-// ── 删除/隐藏确认 Modal（全屏居中）──────────────────────────────────────
+// ── 删除确认 Modal（全屏居中）──────────────────────────────────────
 function RemoveConfirmModal({ item, onConfirm, onCancel }: {
   item: MediaItem;
   onConfirm: () => void;
@@ -226,7 +199,6 @@ function RemoveConfirmModal({ item, onConfirm, onCancel }: {
   const [pw, setPw]   = useState('');
   const [err, setErr] = useState(false);
   const inputRef      = useRef<HTMLInputElement>(null);
-  const isHide        = !item._local;
 
   useEffect(() => { setTimeout(() => inputRef.current?.focus(), 120); }, []);
 
@@ -251,20 +223,14 @@ function RemoveConfirmModal({ item, onConfirm, onCancel }: {
         {/* 图标 + 标题 */}
         <div className="flex flex-col items-center text-center mb-5">
           <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-            style={{ background: isHide ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', border: `1.5px solid ${isHide ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
-            {isHide
-              ? <EyeOff size={20} style={{ color: '#f59e0b' }} />
-              : <AlertTriangle size={20} style={{ color: '#ef4444' }} />
-            }
+            style={{ background: 'rgba(239,68,68,0.1)', border: '1.5px solid rgba(239,68,68,0.3)' }}>
+            <AlertTriangle size={20} style={{ color: '#ef4444' }} />
           </div>
           <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.05rem', fontWeight: 700, color: '#2D2D2D', marginBottom: '6px' }}>
-            {isHide ? '隐藏此内容' : '删除此内容'}
+            删除此内容
           </h3>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.78rem', color: '#6B6B6B', lineHeight: 1.6 }}>
-            {isHide
-              ? <>确认隐藏「<span style={{ color: '#2D2D2D', fontWeight: 600 }}>{item.title}</span>」？可在管理面板中随时恢复。</>
-              : <>确认删除「<span style={{ color: '#2D2D2D', fontWeight: 600 }}>{item.title}</span>」？此操作<span style={{ color: '#ef4444' }}>不可撤销</span>。</>
-            }
+            确认删除「<span style={{ color: '#2D2D2D', fontWeight: 600 }}>{item.title}</span>」？此操作<span style={{ color: '#ef4444' }}>不可撤销</span>。
           </p>
         </div>
 
@@ -307,8 +273,8 @@ function RemoveConfirmModal({ item, onConfirm, onCancel }: {
           </button>
           <button onClick={confirm}
             className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white"
-            style={{ background: isHide ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'linear-gradient(135deg, #f87171, #ef4444)', fontFamily: 'Inter, sans-serif' }}>
-            {isHide ? '确认隐藏' : '确认删除'}
+            style={{ background: 'linear-gradient(135deg, #f87171, #ef4444)', fontFamily: 'Inter, sans-serif' }}>
+            确认删除
           </button>
         </div>
       </motion.div>
@@ -334,12 +300,12 @@ function AddPanel({ onAdd, onClose }: { onAdd: (item: MediaItem) => void; onClos
 
   const handleAdd = () => {
     if (!form.title.trim()) return;
-    const id   = `local_${Date.now()}`;
     const tags = form.tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
     const item: MediaItem = {
-      id, type: form.type, category: form.category,
+      id: 0, // Will be set by server
+      type: form.type, category: form.category,
       title: form.title, desc: form.desc || undefined,
-      date: form.date, tags, _local: true,
+      date: form.date, tags,
       ...(form.type === 'image'
         ? { src: form.src, aspect: form.aspect }
         : form.type === 'bilibili'
@@ -456,29 +422,23 @@ export default function Archive() {
 
   const [activeCategory, setActiveCategory] = useState('all');
   const [activeItem, setActiveItem]         = useState<MediaItem | null>(null);
-  const [localItems, setLocalItems]         = useState<MediaItem[]>(() => loadLocalItems());
-  const [hiddenIds, setHiddenIds]           = useState<string[]>(() => loadHiddenIds());
+
+  // tRPC queries and mutations
+  const { data: items = [], refetch } = trpc.archive.list.useQuery();
+  const createItem = trpc.archive.create.useMutation({ onSuccess: () => refetch() });
+  const deleteItem = trpc.archive.delete.useMutation({ onSuccess: () => refetch() });
 
   // 管理模式状态
   const [adminMode, setAdminMode]         = useState(false);   // 管理模式（卡片显示删除键）
   const [pwVisible, setPwVisible]         = useState(false);   // 密码输入框
   const [addPanelOpen, setAddPanelOpen]   = useState(false);   // 添加面板
 
-  // 删除/隐藏确认
+  // 删除确认
   const [removeTarget, setRemoveTarget]   = useState<MediaItem | null>(null);
 
-  // Persist
-  useEffect(() => { saveLocalItems(localItems); }, [localItems]);
-  useEffect(() => { saveHiddenIds(hiddenIds); }, [hiddenIds]);
-
-  const allItems = useMemo(
-    () => [...mediaItems.filter(m => !hiddenIds.includes(m.id)), ...localItems],
-    [localItems, hiddenIds],
-  );
-
   const filtered = useMemo(
-    () => activeCategory === 'all' ? allItems : allItems.filter(m => m.category === activeCategory),
-    [activeCategory, allItems],
+    () => activeCategory === 'all' ? items : items.filter(m => m.category === activeCategory),
+    [activeCategory, items],
   );
 
   const videoItems = filtered.filter(isVideo);
@@ -502,22 +462,29 @@ export default function Archive() {
   };
 
   // ── 内容操作 ──
-  const handleAdd    = (item: MediaItem) => setLocalItems(prev => [item, ...prev]);
+  const handleAdd = (item: MediaItem) => {
+    createItem.mutate({
+      type: item.type,
+      category: item.category,
+      title: item.title,
+      desc: item.desc,
+      date: item.date,
+      tags: JSON.stringify(item.tags || []),
+      src: item.src,
+      bvid: item.bvid,
+      ytid: item.ytid,
+      thumbnail: item.thumbnail,
+      aspect: item.aspect,
+    });
+  };
 
   const handleRemove = (item: MediaItem) => setRemoveTarget(item);
 
   const handleConfirmRemove = () => {
     if (!removeTarget) return;
-    if (removeTarget._local) {
-      setLocalItems(prev => prev.filter(i => i.id !== removeTarget.id));
-    } else {
-      setHiddenIds(prev => [...prev, removeTarget.id]);
-    }
+    deleteItem.mutate(removeTarget.id);
     setRemoveTarget(null);
   };
-
-  // 恢复所有隐藏（管理模式底部提示用）
-  const handleRestoreAll = () => setHiddenIds([]);
 
   return (
     <PageTransition>
@@ -555,22 +522,13 @@ export default function Archive() {
                     ✏️ 管理模式已开启
                   </span>
                   <span style={{ fontSize: '0.65rem', color: '#9B9B9B', fontFamily: 'Inter, sans-serif' }}>
-                    — 点击卡片右上角 × 可删除/隐藏内容
+                    — 点击卡片右上角 × 可删除内容
                   </span>
                 </div>
-                <div className="flex items-center gap-3">
-                  {hiddenIds.length > 0 && (
-                    <button onClick={handleRestoreAll}
-                      className="flex items-center gap-1 text-xs"
-                      style={{ color: '#f59e0b', fontFamily: 'Inter, sans-serif', fontSize: '0.65rem' }}>
-                      <RotateCcw size={10} /> 恢复 {hiddenIds.length} 条隐藏
-                    </button>
-                  )}
-                  <button onClick={() => { setAdminMode(false); setAddPanelOpen(false); }}
-                    style={{ color: '#9B9B9B', fontSize: '0.65rem', fontFamily: 'Inter, sans-serif' }}>
-                    退出
-                  </button>
-                </div>
+                <button onClick={() => { setAdminMode(false); setAddPanelOpen(false); }}
+                  style={{ color: '#9B9B9B', fontSize: '0.65rem', fontFamily: 'Inter, sans-serif' }}>
+                  退出
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
