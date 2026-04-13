@@ -44,8 +44,11 @@ jobs:
           # 安装 pm2（若未安装）
           npm install -g pm2 --quiet 2>/dev/null || true
 
+          # 让 dist/index.js 以 ES Module 模式运行
+          echo '{"type":"module"}' > /PersonalWeb/dist/package.json
+
           # 启动或重启 Node.js 服务（监听 3000 端口）
-          pm2 restart portfolio 2>/dev/null || pm2 start /PersonalWeb/dist/index.js --name portfolio
+          pm2 restart portfolio --update-env 2>/dev/null || pm2 start /PersonalWeb/dist/index.js --name portfolio
           pm2 save --force
 
           # 更新 Nginx 配置，增加 /api/ 代理
