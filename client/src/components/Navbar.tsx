@@ -3,10 +3,17 @@
  * Design: Cyber Cream Geek
  * Features: sticky top, backdrop blur, active route highlight, mobile menu
  */
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Zap, Download } from 'lucide-react';
+
+const socialLinks = [
+  { label: 'B站',   sub: '麒迹Plus',  emoji: '📺', color: '#00a1d6', href: 'https://space.bilibili.com/225502261' },
+  { label: '抖音',  sub: '麒迹Plus',  emoji: '🎵', color: '#161823', href: 'https://www.douyin.com/user/27315074241' },
+  { label: '小红书', sub: '麒迹Plus', emoji: '📕', color: '#ff2442', href: 'https://www.xiaohongshu.com/user/profile/68347c63000000001d00b66d' },
+  { label: '本站',  sub: 'miracle-wu.com', emoji: '🌐', color: '#8E94F2', href: '/' },
+];
 
 const navLinks = [
   { href: '/', label: '首页', en: 'Home' },
@@ -18,6 +25,18 @@ const navLinks = [
 export default function Navbar() {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [socialOpen, setSocialOpen] = useState(false);
+  const socialRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (socialRef.current && !socialRef.current.contains(e.target as Node)) {
+        setSocialOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   return (
     <header
@@ -119,16 +138,51 @@ export default function Navbar() {
               </span>
             </motion.a>
 
-            {/* 联系我 */}
-            <motion.a
-              href="mailto:wjq13307822575@gmail.com"
-              className="px-4 py-2 rounded-2xl text-sm font-medium text-white"
-              style={{ background: 'linear-gradient(135deg, #8E94F2, #6B72E8)', fontFamily: 'Inter, sans-serif' }}
-              whileHover={{ scale: 1.05, boxShadow: '0 4px 16px rgba(142,148,242,0.4)' }}
-              whileTap={{ scale: 0.95 }}
-            >
-              ✉ 联系我
-            </motion.a>
+            {/* 联系我 — 点击弹出社交链接 */}
+            <div className="relative" ref={socialRef}>
+              <motion.button
+                onClick={() => setSocialOpen(v => !v)}
+                className="px-4 py-2 rounded-2xl text-sm font-medium text-white"
+                style={{ background: 'linear-gradient(135deg, #8E94F2, #6B72E8)', fontFamily: 'Inter, sans-serif' }}
+                whileHover={{ scale: 1.05, boxShadow: '0 4px 16px rgba(142,148,242,0.4)' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                ✦ 联系我
+              </motion.button>
+              <AnimatePresence>
+                {socialOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                    className="absolute right-0 mt-2 w-52 rounded-2xl overflow-hidden"
+                    style={{ background: 'rgba(250,247,242,0.97)', border: '1px solid rgba(142,148,242,0.18)', boxShadow: '0 12px 40px rgba(142,148,242,0.18)', backdropFilter: 'blur(16px)', zIndex: 100 }}
+                  >
+                    {socialLinks.map(s => (
+                      <a
+                        key={s.label}
+                        href={s.href}
+                        target={s.href.startsWith('/') ? '_self' : '_blank'}
+                        rel="noopener noreferrer"
+                        onClick={() => setSocialOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 transition-colors"
+                        style={{ textDecoration: 'none' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(142,148,242,0.07)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        <span className="text-lg">{s.emoji}</span>
+                        <div>
+                          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8rem', fontWeight: 600, color: s.color, margin: 0 }}>{s.label}</p>
+                          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.58rem', color: '#9B9B9B', margin: 0 }}>{s.sub}</p>
+                        </div>
+                        <span className="ml-auto" style={{ color: '#C5C8FF', fontSize: '0.7rem' }}>↗</span>
+                      </a>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
