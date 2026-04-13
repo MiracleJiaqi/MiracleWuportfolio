@@ -17,14 +17,12 @@ import { Link } from 'wouter';
 import { ChevronRight, X, Play, Settings, Plus, AlertTriangle } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 import { useSEO } from '../hooks/useSEO';
-import { trpc } from '../lib/trpc';
-
 // ── Types ──────────────────────────────────────────────────────────────
 type Category = 'moments' | 'bjtu' | 'past' | 'tech' | 'pipeline';
 type MediaType = 'image' | 'bilibili' | 'youtube';
 
 interface MediaItem {
-  id: number;
+  id: string;
   type: MediaType;
   category: Category;
   title: string;
@@ -302,7 +300,7 @@ function AddPanel({ onAdd, onClose }: { onAdd: (item: MediaItem) => void; onClos
     if (!form.title.trim()) return;
     const tags = form.tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
     const item: MediaItem = {
-      id: 0, // Will be set by server
+      id: '', // Will be set by caller
       type: form.type, category: form.category,
       title: form.title, desc: form.desc || undefined,
       date: form.date, tags,
@@ -416,6 +414,25 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
+// ── API ────────────────────────────────────────────────────────────────
+async function fetchArchive(): Promise<{ items: MediaItem[]; hiddenIds: string[] }> {
+  try {
+    const res = await fetch('/api/archive');
+    if (!res.ok) return { items: [], hiddenIds: [] };
+    return res.json();
+  } catch { return { items: [], hiddenIds: [] }; }
+}
+
+async function saveArchive(items: MediaItem[], hiddenIds: string[]) {
+  try {
+    await fetch('/api/archive', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': 'wjq030501+' },
+      body: JSON.stringify({ items, hiddenIds }),
+    });
+  } catch { /* 静默失败，不影响 UI */ }
+}
+
 // ── Main Component ──────────────────────────────────────────────────────
 export default function Archive() {
   useSEO({ title: '足迹 · Miracle Wu', description: '生活瞬间、项目截图、自动化成果与 AI 创作——做过什么，比说过什么更真实。' });
@@ -423,18 +440,38 @@ export default function Archive() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [activeItem, setActiveItem]         = useState<MediaItem | null>(null);
 
-  // tRPC queries and mutations
-  const { data: items = [], refetch } = trpc.archive.list.useQuery();
-  const createItem = trpc.archive.create.useMutation({ onSuccess: () => refetch() });
-  const deleteItem = trpc.archive.delete.useMutation({ onSuccess: () => refetch() });
+  // 数据状态（从服务器 API 读取）
+  const [serverItems, setServerItems] = useState<MediaItem[]>([]);
+  const [hiddenIds, setHiddenIds]     = useState<string[]>([]);
+  const [loaded, setLoaded]           = useState(false);
 
   // 管理模式状态
-  const [adminMode, setAdminMode]         = useState(false);   // 管理模式（卡片显示删除键）
-  const [pwVisible, setPwVisible]         = useState(false);   // 密码输入框
-  const [addPanelOpen, setAddPanelOpen]   = useState(false);   // 添加面板
+  const [adminMode, setAdminMode]         = useState(false);
+  const [pwVisible, setPwVisible]         = useState(false);
+  const [addPanelOpen, setAddPanelOpen]   = useState(false);
 
   // 删除确认
   const [removeTarget, setRemoveTarget]   = useState<MediaItem | null>(null);
+
+  // 页面加载时从服务器拉数据
+  useEffect(() => {
+    fetchArchive().then(data => {
+      setServerItems(data.items ?? []);
+      setHiddenIds(data.hiddenIds ?? []);
+      setLoaded(true);
+    });
+  }, []);
+
+  // 数据变更后同步到服务器
+  useEffect(() => {
+    if (!loaded) return;
+    saveArchive(serverItems, hiddenIds);
+  }, [serverItems, hiddenIds, loaded]);
+
+  const items = useMemo(
+    () => serverItems.filter(m => !hiddenIds.includes(m.id)),
+    [serverItems, hiddenIds],
+  );
 
   const filtered = useMemo(
     () => activeCategory === 'all' ? items : items.filter(m => m.category === activeCategory),
@@ -447,11 +484,9 @@ export default function Archive() {
   // ── 管理模式开关 ──
   const handleGearClick = () => {
     if (adminMode) {
-      // 退出管理模式
       setAdminMode(false);
       setAddPanelOpen(false);
     } else {
-      // 还未解锁 → 弹密码框
       setPwVisible(true);
     }
   };
@@ -463,26 +498,16 @@ export default function Archive() {
 
   // ── 内容操作 ──
   const handleAdd = (item: MediaItem) => {
-    createItem.mutate({
-      type: item.type,
-      category: item.category,
-      title: item.title,
-      desc: item.desc,
-      date: item.date,
-      tags: JSON.stringify(item.tags || []),
-      src: item.src,
-      bvid: item.bvid,
-      ytid: item.ytid,
-      thumbnail: item.thumbnail,
-      aspect: item.aspect,
-    });
+    const newItem: MediaItem = { ...item, id: Date.now().toString() };
+    setServerItems(prev => [...prev, newItem]);
+    setAddPanelOpen(false);
   };
 
   const handleRemove = (item: MediaItem) => setRemoveTarget(item);
 
   const handleConfirmRemove = () => {
     if (!removeTarget) return;
-    deleteItem.mutate(removeTarget.id);
+    setServerItems(prev => prev.filter(m => m.id !== removeTarget.id));
     setRemoveTarget(null);
   };
 

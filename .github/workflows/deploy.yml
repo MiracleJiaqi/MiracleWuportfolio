@@ -39,16 +39,35 @@ jobs:
         TARGET: "/PersonalWeb/dist"
         ARGS: "-avzr --delete"
         SCRIPT_AFTER: |
-          echo "📦 文件已上传到宿主机"
+          echo "📦 文件已上传"
 
-          # 数据库迁移
-          cd /PersonalWeb
-          if [ -f ".env" ]; then
-            echo "🔧 执行数据库迁移..."
-            pnpm db:push || echo "⚠️  迁移失败或已执行"
-          else
-            echo "⚠️  未找到 .env 文件，跳过迁移"
-          fi
+          # 安装 pm2（若未安装）
+          npm install -g pm2 --quiet 2>/dev/null || true
 
+          # 启动或重启 Node.js 服务（监听 3000 端口）
+          pm2 restart portfolio 2>/dev/null || pm2 start /PersonalWeb/dist/index.js --name portfolio
+          pm2 save --force
+
+          # 更新 Nginx 配置，增加 /api/ 代理
+          docker exec GSManager3 bash -c "cat > /etc/nginx/sites-enabled/portfolio << 'NGINXEOF'
+          server {
+              listen 80;
+              server_name _;
+              root /PersonalWeb/dist/public;
+              index index.html;
+
+              location /api/ {
+                  proxy_pass http://172.17.0.1:3000;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+              }
+
+              location / {
+                  try_files \$uri \$uri/ /index.html;
+              }
+          }
+          NGINXEOF"
+
+          # 重载 Nginx
           docker exec GSManager3 nginx -s reload
-          echo "✅ Nginx已重载，部署完成！"
+          echo "✅ 部署完成！Node.js 已启动，Nginx 已重载"
