@@ -19,7 +19,7 @@ import PageTransition from '../components/PageTransition';
 import { useSEO } from '../hooks/useSEO';
 // ── Types ──────────────────────────────────────────────────────────────
 type Category = 'moments' | 'bjtu' | 'past' | 'tech' | 'pipeline';
-type MediaType = 'image' | 'bilibili' | 'youtube';
+type MediaType = 'image' | 'bilibili' | 'youtube' | 'douyin' | 'xhs';
 
 interface MediaItem {
   id: string;
@@ -32,6 +32,7 @@ interface MediaItem {
   bvid?: string;
   ytid?: string;
   thumbnail?: string;
+  url?: string;        // 抖音/小红书原帖链接
   tags?: string[];
   aspect?: 'square' | 'landscape' | 'portrait';
 }
@@ -59,10 +60,17 @@ const aspectClass: Record<NonNullable<MediaItem['aspect']>, string> = {
   square: 'aspect-square', landscape: 'aspect-video', portrait: 'aspect-[3/4]',
 };
 const isVideo   = (item: MediaItem) => item.type === 'bilibili' || item.type === 'youtube';
+const isExtLink = (item: MediaItem) => item.type === 'douyin' || item.type === 'xhs';
 const embedSrc  = (item: MediaItem) =>
   item.type === 'bilibili' ? `https://player.bilibili.com/player.html?bvid=${item.bvid}&page=1&high_quality=1&danmaku=0&autoplay=1`
   : item.type === 'youtube' ? `https://www.youtube.com/embed/${item.ytid}?autoplay=1`
   : '';
+const platformBadge: Record<string, { label: string; bg: string }> = {
+  bilibili: { label: 'Bilibili', bg: 'rgba(0,161,214,0.85)' },
+  youtube:  { label: 'YouTube',  bg: 'rgba(255,0,0,0.8)' },
+  douyin:   { label: '抖音',     bg: 'rgba(0,0,0,0.82)' },
+  xhs:      { label: '小红书',   bg: 'rgba(255,45,85,0.85)' },
+};
 
 // ── SectionHeader / Divider ─────────────────────────────────────────────
 function SectionHeader({ label, icon, count }: { label: string; icon: string; count: number }) {
@@ -106,8 +114,12 @@ function MediaCard({ item, index, adminMode, onClick, onRemove }: {
       className="geek-card overflow-hidden mb-5 break-inside-avoid group relative"
       style={{ cursor: adminMode ? 'default' : 'pointer' }}
     >
-      {/* 媒体区域 — 非管理模式才可点开大图/视频 */}
-      <div onClick={() => !adminMode && onClick(item)}>
+      {/* 媒体区域 */}
+      <div onClick={() => {
+        if (adminMode) return;
+        if (isExtLink(item) && item.url) { window.open(item.url, '_blank', 'noopener,noreferrer'); return; }
+        onClick(item);
+      }}>
         <div className={`relative overflow-hidden ${aspectClass[item.aspect ?? 'landscape']}`}>
           <img
             src={item.src ?? item.thumbnail ?? ''}
@@ -115,16 +127,23 @@ function MediaCard({ item, index, adminMode, onClick, onRemove }: {
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
-          {isVideo(item) && (
+          {(isVideo(item) || isExtLink(item)) && (
             <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.32)' }}>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(142,148,242,0.92)', backdropFilter: 'blur(4px)' }}>
-                <Play size={20} className="text-white" style={{ marginLeft: '2px' }} />
-              </div>
-              <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg text-white"
-                style={{ background: item.type === 'bilibili' ? 'rgba(0,161,214,0.85)' : 'rgba(255,0,0,0.8)', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.55rem', backdropFilter: 'blur(4px)' }}>
-                {item.type === 'bilibili' ? 'Bilibili' : 'YouTube'}
-              </span>
+              {isVideo(item) && (
+                <div className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(142,148,242,0.92)', backdropFilter: 'blur(4px)' }}>
+                  <Play size={20} className="text-white" style={{ marginLeft: '2px' }} />
+                </div>
+              )}
+              {isExtLink(item) && (
+                <span className="text-white text-xs font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>点击查看原帖 ↗</span>
+              )}
+              {platformBadge[item.type] && (
+                <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg text-white"
+                  style={{ background: platformBadge[item.type].bg, fontFamily: 'JetBrains Mono, monospace', fontSize: '0.55rem', backdropFilter: 'blur(4px)' }}>
+                  {platformBadge[item.type].label}
+                </span>
+              )}
             </div>
           )}
           {!adminMode && (
@@ -284,12 +303,12 @@ function RemoveConfirmModal({ item, onConfirm, onCancel }: {
 interface FormState {
   type: MediaType; category: Category; title: string; desc: string;
   date: string; tagsRaw: string; src: string;
-  aspect: 'square' | 'landscape' | 'portrait'; videoUrl: string; thumbnail: string;
+  aspect: 'square' | 'landscape' | 'portrait'; videoUrl: string; thumbnail: string; url: string;
 }
 const defaultForm: FormState = {
   type: 'image', category: 'moments', title: '', desc: '',
   date: new Date().toISOString().slice(0, 7).replace('-', '.'),
-  tagsRaw: '', src: '', aspect: 'landscape', videoUrl: '', thumbnail: '',
+  tagsRaw: '', src: '', aspect: 'landscape', videoUrl: '', thumbnail: '', url: '',
 };
 
 function AddPanel({ onAdd, onClose }: { onAdd: (item: MediaItem) => void; onClose: () => void }) {
@@ -308,7 +327,9 @@ function AddPanel({ onAdd, onClose }: { onAdd: (item: MediaItem) => void; onClos
         ? { src: form.src, aspect: form.aspect }
         : form.type === 'bilibili'
           ? { bvid: extractBvid(form.videoUrl), thumbnail: form.thumbnail || undefined, aspect: 'landscape' as const }
-          : { ytid: extractYtid(form.videoUrl), thumbnail: form.thumbnail || undefined, aspect: 'landscape' as const }),
+          : form.type === 'youtube'
+            ? { ytid: extractYtid(form.videoUrl), thumbnail: form.thumbnail || undefined, aspect: 'landscape' as const }
+            : { src: form.thumbnail, thumbnail: form.thumbnail || undefined, url: form.url, aspect: form.aspect }),
     };
     onAdd(item);
     setForm(defaultForm);
@@ -344,7 +365,7 @@ function AddPanel({ onAdd, onClose }: { onAdd: (item: MediaItem) => void; onClos
       </div>
 
       <div className="p-4 space-y-3">
-        <div><span style={lbl}>内容类型</span><div className="flex gap-1.5"><TypeBtn t="image" label="🖼 图片" /><TypeBtn t="bilibili" label="📺 B站" /><TypeBtn t="youtube" label="▶ YT" /></div></div>
+        <div><span style={lbl}>内容类型</span><div className="flex gap-1.5 flex-wrap"><TypeBtn t="image" label="🖼 图片" /><TypeBtn t="bilibili" label="📺 B站" /><TypeBtn t="youtube" label="▶ YT" /><TypeBtn t="douyin" label="🎵 抖音" /><TypeBtn t="xhs" label="📕 小红书" /></div></div>
         <div>
           <span style={lbl}>分类</span>
           <select value={form.category} onChange={e => set('category', e.target.value)} style={inp}>
@@ -376,6 +397,13 @@ function AddPanel({ onAdd, onClose }: { onAdd: (item: MediaItem) => void; onClos
               )}
             </div>
             <div><span style={lbl}>封面图 URL（可选）</span><input value={form.thumbnail} onChange={e => set('thumbnail', e.target.value)} placeholder="https://..." style={inp} /></div>
+          </>
+        )}
+        {(form.type === 'douyin' || form.type === 'xhs') && (
+          <>
+            <div><span style={lbl}>封面图/截图 URL *</span><input value={form.thumbnail} onChange={e => set('thumbnail', e.target.value)} placeholder="postimages 直链" style={inp} /></div>
+            <div><span style={lbl}>原帖链接（点击跳转）</span><input value={form.url} onChange={e => set('url', e.target.value)} placeholder="https://..." style={inp} /></div>
+            <div><span style={lbl}>宽高比</span><div className="flex gap-1.5"><AspBtn a="landscape" label="横版" /><AspBtn a="square" label="正方" /><AspBtn a="portrait" label="竖版" /></div></div>
           </>
         )}
         <motion.button onClick={handleAdd} disabled={!form.title.trim()}
@@ -652,13 +680,27 @@ export default function Archive() {
                       <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem', color: '#9B9B9B' }}>{activeItem.date}</span>
                     </div>
                     {activeItem.desc && <p className="text-sm leading-relaxed mb-3" style={{ color: '#6B6B6B', fontFamily: 'Inter, sans-serif' }}>{activeItem.desc}</p>}
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {activeItem.tags?.map(tag => (
                         <span key={tag} className="text-xs px-2 py-0.5 rounded-lg"
                           style={{ background: 'rgba(142,148,242,0.08)', color: '#8E94F2', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem' }}>
                           {tag}
                         </span>
                       ))}
+                      {activeItem.type === 'bilibili' && activeItem.bvid && (
+                        <a href={`https://www.bilibili.com/video/${activeItem.bvid}`} target="_blank" rel="noopener noreferrer"
+                          className="text-xs px-2.5 py-0.5 rounded-lg flex items-center gap-1"
+                          style={{ background: 'rgba(0,161,214,0.1)', color: '#00a1d6', border: '1px solid rgba(0,161,214,0.25)', fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', textDecoration: 'none' }}>
+                          ↗ 在B站观看高清版
+                        </a>
+                      )}
+                      {activeItem.type === 'youtube' && activeItem.ytid && (
+                        <a href={`https://www.youtube.com/watch?v=${activeItem.ytid}`} target="_blank" rel="noopener noreferrer"
+                          className="text-xs px-2.5 py-0.5 rounded-lg flex items-center gap-1"
+                          style={{ background: 'rgba(255,0,0,0.08)', color: '#ff0000', border: '1px solid rgba(255,0,0,0.2)', fontFamily: 'Inter, sans-serif', fontSize: '0.65rem', textDecoration: 'none' }}>
+                          ↗ 在YouTube观看高清版
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
